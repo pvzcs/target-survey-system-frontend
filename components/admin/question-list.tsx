@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Question } from '@/types';
 import { Button, Card, CardContent, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui';
 import { GripVerticalIcon } from 'lucide-react';
@@ -15,6 +15,7 @@ interface QuestionListProps {
   surveyId: number;
   onAddQuestion: () => void;
   onEditQuestion: (question: Question) => void;
+  onQuestionDeleted?: (questionId: number) => void;
   onQuestionsReordered: (questions: Question[]) => void;
 }
 
@@ -112,11 +113,16 @@ function SortableQuestionItem({ question, index, onEdit, onDelete }: SortableQue
   );
 }
 
-export function QuestionList({ questions, surveyId, onAddQuestion, onEditQuestion, onQuestionsReordered }: QuestionListProps) {
+export function QuestionList({ questions, surveyId, onAddQuestion, onEditQuestion, onQuestionDeleted, onQuestionsReordered }: QuestionListProps) {
   const [localQuestions, setLocalQuestions] = useState(questions);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [questionToDelete, setQuestionToDelete] = useState<Question | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Sync local questions with prop changes
+  useEffect(() => {
+    setLocalQuestions(questions);
+  }, [questions]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -158,10 +164,18 @@ export function QuestionList({ questions, surveyId, onAddQuestion, onEditQuestio
     setIsDeleting(true);
     try {
       await questionsApi.delete(questionToDelete.id);
-      const updatedQuestions = localQuestions.filter(q => q.id !== questionToDelete.id);
-      setLocalQuestions(updatedQuestions);
-      onQuestionsReordered(updatedQuestions);
       toast.success('题目已删除');
+      
+      // Notify parent component
+      if (onQuestionDeleted) {
+        onQuestionDeleted(questionToDelete.id);
+      } else {
+        // Fallback: update local state
+        const updatedQuestions = localQuestions.filter(q => q.id !== questionToDelete.id);
+        setLocalQuestions(updatedQuestions);
+        onQuestionsReordered(updatedQuestions);
+      }
+      
       setDeleteDialogOpen(false);
       setQuestionToDelete(null);
     } catch (error) {
@@ -171,11 +185,6 @@ export function QuestionList({ questions, surveyId, onAddQuestion, onEditQuestio
       setIsDeleting(false);
     }
   };
-
-  // Update local questions when prop changes
-  if (questions !== localQuestions && questions.length !== localQuestions.length) {
-    setLocalQuestions(questions);
-  }
 
   return (
     <>

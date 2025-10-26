@@ -47,6 +47,14 @@ export function QuestionDialog({ open, onOpenChange, question, surveyId, onSucce
     }
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    // Reset saving state when dialog closes
+    if (!newOpen) {
+      setIsSaving(false);
+    }
+    onOpenChange(newOpen);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -56,6 +64,7 @@ export function QuestionDialog({ open, onOpenChange, question, surveyId, onSucce
           </DialogTitle>
         </DialogHeader>
         <QuestionForm
+          key={question?.id || 'new'}
           question={question}
           surveyId={surveyId}
           onSave={handleSave}

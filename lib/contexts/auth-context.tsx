@@ -2,13 +2,14 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authApi } from '@/lib/api/auth';
-import type { User } from '@/types';
+import type { User, ProfileUpdateRequest } from '@/types';
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
+  updateProfile: (data: ProfileUpdateRequest) => Promise<void>;
   isAuthenticated: boolean;
   isLoading: boolean;
 }
@@ -86,11 +87,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('auth_user');
   }, []);
 
+  const updateProfile = useCallback(async (data: ProfileUpdateRequest) => {
+    try {
+      const response = await authApi.updateProfile(data);
+      
+      // Update user in state
+      setUser(response.user);
+      
+      // Update localStorage
+      localStorage.setItem('auth_user', JSON.stringify(response.user));
+    } catch (error) {
+      console.error('Profile update failed:', error);
+      throw error;
+    }
+  }, []);
+
   const value: AuthContextType = {
     user,
     token,
     login,
     logout,
+    updateProfile,
     isAuthenticated: !!token && !!user,
     isLoading,
   };

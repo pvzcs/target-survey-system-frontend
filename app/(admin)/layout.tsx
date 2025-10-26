@@ -63,6 +63,17 @@ export default function AdminLayout({
                 </div>
               </div>
 
+              {/* Profile Settings Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push('/admin/profile')}
+                className="min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
+              >
+                <span className="hidden sm:inline">个人设置</span>
+                <span className="sm:hidden">设置</span>
+              </Button>
+
               {/* Logout Button */}
               <Button
                 variant="outline"

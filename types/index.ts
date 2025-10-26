@@ -12,6 +12,20 @@ export interface AuthResponse {
   user: User;
 }
 
+// Profile update request
+export interface ProfileUpdateRequest {
+  username?: string;
+  email?: string;
+  old_password?: string;
+  new_password?: string;
+}
+
+// Profile update response
+export interface ProfileUpdateResponse {
+  message: string;
+  user: User;
+}
+
 // Survey status
 export type SurveyStatus = 'draft' | 'published';
 

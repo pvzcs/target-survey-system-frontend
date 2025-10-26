@@ -46,3 +46,4 @@ export { Textarea } from "./textarea";
 export { Badge, badgeVariants } from "./badge";
 export { Progress } from "./progress";
 export { Separator } from "./separator";
+export { Alert, AlertDescription } from "./alert";
