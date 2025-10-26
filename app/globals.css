@@ -119,4 +119,14 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Smooth scrolling for better UX */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Improve tap highlight on mobile */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
 }

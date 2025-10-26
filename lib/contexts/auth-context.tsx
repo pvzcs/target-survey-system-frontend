@@ -25,15 +25,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const storedToken = localStorage.getItem('auth_token');
     const storedUser = localStorage.getItem('auth_user');
 
-    if (storedToken && storedUser) {
+    if (storedToken && storedUser && storedUser !== 'undefined' && storedUser !== 'null') {
       try {
-        setToken(storedToken);
-        setUser(JSON.parse(storedUser));
+        const parsedUser = JSON.parse(storedUser);
+        if (parsedUser && typeof parsedUser === 'object') {
+          setToken(storedToken);
+          setUser(parsedUser);
+        } else {
+          // Invalid user data, clear storage
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('auth_user');
+        }
       } catch (error) {
         console.error('Failed to restore auth state:', error);
         localStorage.removeItem('auth_token');
         localStorage.removeItem('auth_user');
       }
+    } else if (storedToken || storedUser) {
+      // Partial or invalid data, clear everything
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
     }
     setIsLoading(false);
   }, []);
@@ -41,6 +52,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(async (username: string, password: string) => {
     try {
       const response = await authApi.login(username, password);
+      
+      // Validate response
+      if (!response.token || !response.user) {
+        throw new Error('Invalid login response');
+      }
       
       // Store token and user in state
       setToken(response.token);
@@ -51,6 +67,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('auth_user', JSON.stringify(response.user));
     } catch (error) {
       console.error('Login failed:', error);
+      // Clear any partial state
+      setToken(null);
+      setUser(null);
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
       throw error;
     }
   }, []);

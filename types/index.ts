@@ -87,11 +87,23 @@ export interface Response {
   created_at: string;
 }
 
+// Question statistics for charts
+export interface QuestionStatistics {
+  question_id: number;
+  question_title: string;
+  question_type: QuestionType;
+  response_count: number;
+  response_rate: number;
+  // For single/multiple choice questions
+  option_counts?: Record<string, number>;
+}
+
 // Statistics information
 export interface Statistics {
   survey_id: number;
   total_responses: number;
   completion_rate: number;
+  question_statistics?: QuestionStatistics[];
 }
 
 // Share link
@@ -101,9 +113,12 @@ export interface ShareLink {
   expires_at: string;
 }
 
-// Public survey data
+// Public survey data (actual API response structure)
 export interface PublicSurveyData {
-  survey: Survey;
+  id: number;
+  title: string;
+  description: string;
+  questions: Question[];
   prefill_data: Record<string, string>;
 }
 
